@@ -2,14 +2,70 @@ version: '3.8'
 
 services:
   minio:
+    container_name: minio
     image: 'bitnami/minio:latest'
     ports:
       - '9000:9000'
       - '9001:9001'
-    environment:
-      - MINIO_ROOT_USER=grupo2
-      - MINIO_ROOT_PASSWORD=admin123
-      - MINIO_DEFAULT_BUCKETS=srag,ngl,vacinacao,srag-output,ngl-output,vacinacao-output
+    env_file:
+      - .env
+    volumes:
+      - miniodata:/data
+    networks:
+      - private_network
+
+  airflowdb:
+    image: bitnami/postgresql:latest
+    container_name: airflowdb
+    ports:
+      - "5434:5432"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres-data:/bitnami/postgresql
+    networks:
+      - private_network
+
+  airflow-worker:
+    container_name: airflow-worker
+    image: bitnami/airflow-worker:2.4.2
+    env_file:
+      - .env
+    networks:
+      - private_network
+    depends_on:
+      - airflowdb
+
+  airflow-scheduler:
+    container_name: airflow-scheduler
+    image: bitnami/airflow-scheduler:2.4.2
+    env_file:
+      - .env
+    networks:
+      - private_network
+    depends_on:
+      - airflowdb
+
+  airflow:
+    container_name: airflow
+    image: bitnami/airflow:2.4.2
+    env_file:
+      - .env
+    ports:
+      - '8080:8080'
+    networks:
+      - private_network
+    depends_on:
+      - airflowdb
 
 volumes:
-  datasets: {}
+  miniodata: {}
+  postgres-data: {}
+
+networks:
+  private_network:
