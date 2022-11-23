@@ -4,6 +4,7 @@
 ### Datasets que serão utilizados
 
 #### Banco de Dados de Síndrome Respiratória Aguda Grave - incluindo dados da COVID-19
+Obs: estes datasets incluem dados do Brasil inteiro, iremos tratar para gerar apenas referente ao estado da Paraíba
 - [srag-2020.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SRAG/2020/INFLUD20-14-11-2022.csv)
 - [srag-2021.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SRAG/2021/INFLUD21-14-11-2022.csv)
 - [srag-2022.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SRAG/2022/INFLUD22-14-11-2022.csv)
