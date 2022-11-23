@@ -1,7 +1,7 @@
 # Data integration project with the theme of the covid pandemic in Brazil
 
 
-### Datasets que serão utilizados
+### Datasets to be used
 
 #### Banco de Dados de Síndrome Respiratória Aguda Grave - incluindo dados da COVID-19
 Obs: estes datasets incluem dados do Brasil inteiro, iremos tratar para gerar apenas referente ao estado da Paraíba
