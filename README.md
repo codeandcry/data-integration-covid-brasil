@@ -23,7 +23,10 @@ Obs: estes datasets incluem dados do Brasil inteiro, iremos tratar para gerar ap
 <table>
   <tbody>
     <tr>
-      <td align="center"><a href="https://kentcdodds.com"><img src="https://avatars.githubusercontent.com/u/16957232?v=3?s=100" width="100px;" alt="Rômulo Soares"/><br /><sub><b>Rômulo Soares</b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/romulo-soares"><img src="https://avatars.githubusercontent.com/u/16957232?v=3?s=100" width="100px;" alt="Rômulo Soares"/><br /><sub><b>Rômulo Soares</b></sub></a><br /></td>
+<td align="center"><a href="https://github.com/Jozymar"><img src="https://avatars.githubusercontent.com/u/19935729?v=3?s=100" width="100px;" alt="Jozimar Soares"/><br /><sub><b>Jozimar Soares</b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/lyndemberg"><img src="https://avatars.githubusercontent.com/u/19334619?v=3?s=100" width="100px;" alt="Lyndemberg Batista"/><br /><sub><b>Lyndemberg Batista</b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/fcobbraga"><img src="https://avatars.githubusercontent.com/u/4456149?v=3?s=100" width="100px;" alt="Francisco Braga"/><br /><sub><b>Francisco Braga</b></sub></a><br /></td>
      </tr>
    </tbody>
  </table>
