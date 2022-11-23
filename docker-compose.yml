@@ -10,62 +10,72 @@ services:
     env_file:
       - .env
     volumes:
-      - miniodata:/data
-    networks:
-      - private_network
+      - ./miniodata:/data
 
-  airflowdb:
-    image: bitnami/postgresql:latest
+  airflowdb:  
+    image: postgres:13
     container_name: airflowdb
     ports:
       - "5434:5432"
     env_file:
       - .env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 10s
-      timeout: 5s
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 5s
       retries: 5
     volumes:
-      - postgres-data:/bitnami/postgresql
-    networks:
-      - private_network
+      - ./postgres-data:/var/lib/postgresql/data
+    restart: always
 
   airflow-worker:
     container_name: airflow-worker
-    image: bitnami/airflow-worker:2.4.2
+    image: bitnami/airflow-worker:2.4.3
     env_file:
       - .env
-    networks:
-      - private_network
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 10s
+      timeout: 10s
+      retries: 5
     depends_on:
       - airflowdb
+    restart: always
 
   airflow-scheduler:
     container_name: airflow-scheduler
-    image: bitnami/airflow-scheduler:2.4.2
+    image: bitnami/airflow-scheduler:2.4.3
     env_file:
       - .env
-    networks:
-      - private_network
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+      interval: 10s
+      timeout: 10s
+      retries: 5
     depends_on:
       - airflowdb
+    restart: always
 
   airflow:
     container_name: airflow
-    image: bitnami/airflow:2.4.2
+    image: bitnami/airflow:2.4.3
     env_file:
       - .env
     ports:
       - '8080:8080'
-    networks:
-      - private_network
+    volumes:
+      - ./dags:/opt/bitnami/airflow/dags
     depends_on:
       - airflowdb
+      - airflow-worker
+      - airflow-scheduler
+    restart: always
 
 volumes:
-  miniodata: {}
-  postgres-data: {}
-
-networks:
-  private_network:
+  minio-data: 
+    driver: local
+  postgres-data:
+    driver: local
+  dags:
+    driver: local
