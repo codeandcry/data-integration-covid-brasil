@@ -1,4 +1,4 @@
-# data-integration-covid-brasil
+# Data integration project with the theme of the covid pandemic in Brazil
 
 
 ### Datasets que serão utilizados
