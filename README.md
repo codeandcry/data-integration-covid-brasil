@@ -11,12 +11,12 @@
 >[srag-2022.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SRAG/2022/INFLUD22-14-11-2022.csv)
 
 - #### Flu Syndrome notifications (State of Paraiba)
->[ngl-pb-2020.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SGL/2020/uf=PB/lote=1/part-00000-0508a0cd-d93a-42d4-b285-50673d466ef5.c000.csv)<br>
->[ngl-pb-2021.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SGL/2021/uf=PB/lote=1/part-00000-8ddd7426-a19e-4f50-8160-9ca367d9f665.c000.csv)<br>
->[ngl-pb-2022.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SGL/2022/uf=PB/lote=1/part-00000-766fb4c6-b9e8-4dc3-89c5-6e0570abf69b.c000.csv)
+>[ngl-pb-2020.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SGL/2020/uf=PB/lote=1/part-00000-98c07771-b33f-431c-b1fe-eed05d8301e5.c000.csv)<br>
+>[ngl-pb-2021.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SGL/2021/uf=PB/lote=1/part-00000-a7c7dcd3-9bba-492a-877d-a85497fc9985.c000.csv)<br>
+>[ngl-pb-2022.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SGL_NEW/2022/uf=PB/lote=1/part-00000-a884adeb-a49f-44a4-9d49-5698c43e68a8.c000.csv)
 
 - #### National Covid-19 Vaccination Campaign (State of Paraíba)
->[vacinacao-covid-pb.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIPNI/COVID/uf/uf%3DPB/part-00000-5081cb2c-6220-4b82-9e45-531c3ba948d7.c000.csv)
+>[vacinacao-covid-pb.csv](https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIPNI/COVID/uf/uf%3DPB/part-00000-cebaa94c-82a9-46e2-8c12-9cc16a61b38b.c000.csv)
 
 
 

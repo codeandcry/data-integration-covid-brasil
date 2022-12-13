@@ -1,3 +1,12 @@
+.idea/
 datasets/
 miniodata/
 postgres-data
+notebooks/ngl-pb-2020.csv
+notebooks/ngl-pb-2021.csv
+notebooks/ngl-pb-2022.csv
+notebooks/srag-2020.csv
+notebooks/srag-2021.csv
+notebooks/srag-2022.csv
+notebooks/vacinacao-covid-pb.csv
+dags/__pycache__/
