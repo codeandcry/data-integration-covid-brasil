@@ -161,6 +161,19 @@ services:
       /opt/conda/bin/jupyter notebook --notebook-dir=/opt/notebooks --ip='0.0.0.0' --port=8888 --no-browser --allow-root
     tty: true
 
+
+  yugabyte:
+    container_name: yugabyte
+    image: yugabytedb/yugabyte:latest
+    ports:
+      - "7000:7000"
+      - "9000:9000"
+      - "5433:5433"
+      - "9042:9042"
+    volumes:
+      - ./yb_data:/home/yugabyte/yb_data
+    command: bin/yugabyted start --base_dir=/home/yugabyte/yb_data --daemon=false
+
 volumes:
   minio-data: 
     driver: local
