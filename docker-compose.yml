@@ -167,7 +167,7 @@ services:
     image: yugabytedb/yugabyte:latest
     ports:
       - "7000:7000"
-      - "9000:9000"
+      - "9002:9002"
       - "5433:5433"
       - "9042:9042"
     volumes:
