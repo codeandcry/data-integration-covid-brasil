@@ -10,3 +10,6 @@ notebooks/srag-2021.csv
 notebooks/srag-2022.csv
 notebooks/vacinacao-covid-pb.csv
 dags/__pycache__/
+yb_data/
+notebooks/confirm.txt
+notebooks/cookies.txt
