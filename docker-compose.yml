@@ -3,14 +3,15 @@ version: '3.8'
 services:
   minio:
     container_name: minio
-    image: 'bitnami/minio:latest'
+    command: server /data --console-address ":9001"
     ports:
       - '9000:9000'
       - '9001:9001'
+    image: minio/minio:RELEASE.2021-12-20T22-07-16Z.fips
     env_file:
       - .env
     volumes:
-      - ./miniodata:/opt/bitnami/minio/data
+      - ./minio_data:/data
 
   airflow-web:
     container_name: airflow-web
@@ -87,17 +88,28 @@ services:
     tty: true
 
   data_warehouse:
-      image: mysql:5.7
-      restart: always
-      env_file:
-        - .env
-      ports:
-        - '3306:3306'
-      volumes:
-        - mysql:/var/lib/mysql
+    image: mysql:5.7
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql:/var/lib/mysql
+
+  spark:
+    image: bitnami/spark:latest
+    ports:
+      - '7077:7077'
+      - '9090:8080'
+    volumes:
+      - ./spark_data:/bitnami/spark
+    env_file:
+      - .env
+
 
 volumes:
-  minio-data: 
+  minio_data:
     driver: local
   postgres-data:
     driver: local
@@ -106,4 +118,6 @@ volumes:
   notebooks:
     driver: local
   mysql:
+    driver: local
+  spark_data:
     driver: local
