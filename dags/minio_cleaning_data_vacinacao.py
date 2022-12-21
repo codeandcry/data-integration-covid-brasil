@@ -57,7 +57,7 @@ with DAG(
 
         vacinacao_csv = vacinacao_df.to_csv().encode('utf-8')
 
-        client.put_object("vacinacao-output", "vacinacao-covid-pb.csv", data=BytesIO(vacinacao_csv),
+        client.put_object("vacinacao-output", "output-vacinacao-covid-pb.csv", data=BytesIO(vacinacao_csv),
                           length=len(vacinacao_csv), content_type='application/csv')
 
 

@@ -9,8 +9,6 @@ from airflow import DAG
 from airflow.decorators import task
 from minio import Minio
 
-log = logging.getLogger(_name_)
-
 PATH_TO_PYTHON_BINARY = sys.executable
 
 BASE_DIR = tempfile.gettempdir()
