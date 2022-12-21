@@ -94,35 +94,7 @@ services:
       - AIRFLOW_WEBSERVER_HOST=airflow-web
       - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
       - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
-
-  test-runner:
-    container_name: test-runner
-    image: bitnami/airflow-scheduler:latest
-    depends_on:
-      - airflow-web
-    working_dir: /src
-    volumes:
-      - ./dags:/src/dags
-      - ./plugins:/src/plugins
-      - ./tests:/src/tests
-      - ./scripts:/src/scripts
-      - ./requirements-dev.txt:/bitnami/python/requirements.txt
-    environment:
-      - PYTHONPATH=/src
-      - AIRFLOW_ADMIN_USERNAME=${AIRFLOW_USERNAME}
-      - AIRFLOW_ADMIN_PASSWORD=${AIRFLOW_PASSWORD}
-      - AIRFLOW_DATABASE_HOST=${AIRFLOW_DATABASE_HOST}
-      - AIRFLOW_DATABASE_NAME=${AIRFLOW_DATABASE_NAME}
-      - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DATABASE_USERNAME}
-      - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DATABASE_PASSWORD}
-      - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
-      - AIRFLOW_LOAD_EXAMPLES=no
-      - AIRFLOW_SECRET_KEY=${AIRFLOW_SECRET_KEY}
-      - AIRFLOW_WEBSERVER_HOST=airflow-web
-      - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
-    command: >
-      bash -c "bash /src/scripts/wait_for_airflow_web.sh
-      && pytest -vvv -s --log-cli-level=DEBUG /src/tests/integration"
+      - AIRFLOW__CORE__ENABLE_XCOM_PICKLING=True
 
   airflowdb:
     container_name: airflowdb
