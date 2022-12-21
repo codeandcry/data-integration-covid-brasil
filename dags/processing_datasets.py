@@ -49,34 +49,19 @@ with DAG(
             print(f'Processing {item.object_name} in bucket={bucketName}')
             file = client.get_object(bucketName, item.object_name, item.object_name)
             df = pd.read_csv(BytesIO(file.read()), sep=";", encoding='utf-8', low_memory=False)
-            print(f'{len(df)} rows in "{item.object_name}')
+            print(f'{len(df)} rows in {item.object_name}')
             dfAll = pd.concat([dfAll, df], ignore_index=True, sort=False)
 
         dfAll.fillna('', inplace=True)
         print(f'bucket: {bucketName} rows: {len(dfAll)}')
         return dfAll
 
-    @task(task_id="get_ngl_output")
-    def getNglOutput():
-        return processBucketFilesToSingleDataFrame("ngl-output")
-    get_ngl_output_step = getNglOutput()
-
-    @task(task_id="get_srag_output")
-    def getSragOutput():
-        return processBucketFilesToSingleDataFrame("srag-output")
-    get_srag_output_step = getSragOutput()
-
-    @task(task_id="get_vacinacao_output")
-    def getVacinacaoOutput():
-        return processBucketFilesToSingleDataFrame("vacinacao-output")
-    get_vacinacao_output_step = getVacinacaoOutput()
-
     @task(task_id="merge_datasets")
-    def mergeDatasets(**kwargs):
-        ti = kwargs['ti']
-        dfNglRetorno = ti.xcom_pull(task_ids='get_ngl_output')
-        dfSragRetorno = ti.xcom_pull(task_ids='get_srag_output')
-        dfVacinacaoRetorno = ti.xcom_pull(task_ids='get_vacinacao_output')
+    def mergeDatasets():
+        dfNglRetorno = processBucketFilesToSingleDataFrame("ngl-output")
+        dfSragRetorno = processBucketFilesToSingleDataFrame("srag-output")
+        dfVacinacaoRetorno = processBucketFilesToSingleDataFrame("vacinacao-output")
+
         print(f'count {len(dfNglRetorno)}')
         print(f'count {len(dfSragRetorno)}')
         print(f'count {len(dfVacinacaoRetorno)}')
@@ -93,4 +78,4 @@ with DAG(
 
 
 
-check_minio_connection_step >> get_ngl_output_step >> get_srag_output_step >> get_vacinacao_output_step >> merge_data_step >> check_data_warehouse_connection_step
+check_minio_connection_step >> merge_data_step >> check_data_warehouse_connection_step
