@@ -20,7 +20,7 @@ BASE_DIR = tempfile.gettempdir()
 client = Minio("172.17.0.1:9000", secure=False, access_key="grupo2", secret_key="admin123")
 
 with DAG(
-        dag_id="minio_cleaning_bucket_vacinacao",
+        dag_id="minio_cleaning_data_vacinacao",
         schedule=None,
         start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
         catchup=False,
