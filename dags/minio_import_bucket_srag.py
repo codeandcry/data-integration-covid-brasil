@@ -1,13 +1,15 @@
+from __future__ import annotations
+
 import logging
 import sys
 import tempfile
-from io import BytesIO
-
-import pandas as pd
 import pendulum
+
 from airflow import DAG
 from airflow.decorators import task
 from minio import Minio
+
+log = logging.getLogger(__name__)
 
 PATH_TO_PYTHON_BINARY = sys.executable
 
@@ -16,20 +18,18 @@ BASE_DIR = tempfile.gettempdir()
 client = Minio("172.17.0.1:9000", secure=False, access_key="grupo2", secret_key="admin123")
 
 with DAG(
-        dag_id="minio_cleaning_data_srag",
-        schedule=None,
-        start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
-        catchup=False,
-        tags=["minio"],
+    dag_id="minio_import_bucket_srag",
+    schedule=None,
+    start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
+    catchup=False,
+    tags=["minio"],
 ) as dag:
+
     @task(task_id="check-minio-connection")
     def check_minio_connection(ds=None, **kwargs):
         client.list_buckets()
         print("Conexão ativa!")
-
-
     check_minio_connection_step = check_minio_connection()
-
 
     @task(task_id="check-minio-bucket")
     def check_minio_bucket(ds=None, **kwargs):
@@ -38,47 +38,27 @@ with DAG(
         if "srag" not in existing_buckets:
             client.make_bucket("srag")
         print(client.list_buckets())
-
-
     check_minio_buckets_step = check_minio_bucket()
 
+    @task(task_id="send-file-srag-2020")
+    def send_file_srag_2020(ds=None, **kwargs):
+        client.fput_object("srag", "srag-2020.csv", "/opt/notebooks/srag-2020.csv")
+        print("Arquivo enviado com sucesso!")
+    send_file_srag_2020_step = send_file_srag_2020()
 
-    @task(task_id="cleaning_file_srag_for_output")
-    def cleaning_file_srag_for_output(ds=None, **kwargs):
-        srag_2020_obj = client.get_object("srag", "srag-2020.csv")
-        srag_2021_obj = client.get_object("srag", "srag-2021.csv")
-        srag_2022_obj = client.get_object("srag", "srag-2022.csv")
+    @task(task_id="send-file-srag-2021")
+    def send_file_srag_2021(ds=None, **kwargs):
+        client.fput_object("srag", "srag-2021.csv", "/opt/notebooks/srag-2021.csv")
+        print("Arquivo enviado com sucesso!")
+    send_file_srag_2021_step = send_file_srag_2021()
 
-        srag_2020_df = pd.read_csv(srag_2020_obj, sep=';', low_memory=False)
-        srag_2021_df = pd.read_csv(srag_2021_obj, sep=';', low_memory=False)
-        srag_2022_df = pd.read_csv(srag_2022_obj, sep=';', low_memory=False)
-
-        srag_2020_df.drop_duplicates(keep='first', inplace=True)
-        srag_2021_df.drop_duplicates(keep='first', inplace=True)
-        srag_2022_df.drop_duplicates(keep='first', inplace=True)
-
-        srag_2020_df_mask = srag_2020_df['SG_UF_NOT'] == 'PB'
-        srag_2020_filtered_df = srag_2020_df[srag_2020_df_mask]
-
-        srag_2021_df_mask = srag_2021_df['SG_UF_NOT'] == 'PB'
-        srag_2021_filtered_df = srag_2021_df[srag_2021_df_mask]
-
-        srag_2022_df_mask = srag_2022_df['SG_UF_NOT'] == 'PB'
-        srag_2022_filtered_df = srag_2022_df[srag_2022_df_mask]
-
-        srag_2020_csv = srag_2020_filtered_df.to_csv().encode('utf-8')
-        srag_2021_csv = srag_2021_filtered_df.to_csv().encode('utf-8')
-        srag_2022_csv = srag_2022_filtered_df.to_csv().encode('utf-8')
-
-        client.put_object("srag-output", "output-srag-pb-2020.csv", data=BytesIO(srag_2020_csv),
-                          length=len(srag_2020_csv), content_type='application/csv')
-        client.put_object("srag-output", "output-srag-pb-2021.csv", data=BytesIO(srag_2021_csv),
-                          length=len(srag_2021_csv), content_type='application/csv')
-        client.put_object("srag-output", "output-srag-pb-2022.csv", data=BytesIO(srag_2022_csv),
-                          length=len(srag_2022_csv), content_type='application/csv')
-
-
-    cleaning_file_srag_for_output_step = cleaning_file_srag_for_output()
+    @task(task_id="send-file-srag-2022")
+    def send_file_srag_2022(ds=None, **kwargs):
+        client.fput_object("srag", "srag-2022.csv", "/opt/notebooks/srag-2022.csv")
+        print("Arquivo enviado com sucesso!")
+    send_file_srag_2022_step = send_file_srag_2022()
 
 check_minio_connection_step >> check_minio_buckets_step
-check_minio_buckets_step >> cleaning_file_srag_for_output_step
+check_minio_buckets_step >> send_file_srag_2020_step
+send_file_srag_2020_step >> send_file_srag_2021_step
+send_file_srag_2021_step >> send_file_srag_2022_step
