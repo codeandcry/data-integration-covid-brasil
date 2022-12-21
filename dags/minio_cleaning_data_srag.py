@@ -35,12 +35,12 @@ with DAG(
     check_minio_connection_step = check_minio_connection()
 
 
-    @task(task_id="check-minio-bucket")
+    @task(task_id="check-minio-bucket-output")
     def check_minio_bucket(ds=None, **kwargs):
         existing_buckets = client.list_buckets()
         existing_buckets = [i.name for i in existing_buckets]
-        if "srag" not in existing_buckets:
-            client.make_bucket("srag")
+        if "srag-output" not in existing_buckets:
+            client.make_bucket("srag-output")
         print(client.list_buckets())
 
 

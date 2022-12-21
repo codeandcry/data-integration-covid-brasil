@@ -35,12 +35,12 @@ with DAG(
     check_minio_connection_step = check_minio_connection()
 
 
-    @task(task_id="check-minio-bucket")
+    @task(task_id="check-minio-bucket-output")
     def check_minio_bucket(ds=None, **kwargs):
         existing_buckets = client.list_buckets()
         existing_buckets = [i.name for i in existing_buckets]
-        if "ngl" not in existing_buckets:
-            client.make_bucket("ngl")
+        if "ngl-output" not in existing_buckets:
+            client.make_bucket("ngl-output")
         print(client.list_buckets())
 
 
@@ -60,6 +60,15 @@ with DAG(
         ngl_pb_2020_df.drop_duplicates(keep='first', inplace=True)
         ngl_pb_2021_df.drop_duplicates(keep='first', inplace=True)
         ngl_pb_2022_df.drop_duplicates(keep='first', inplace=True)
+
+        relevant_columns = ['dataNotificacao', 'dataInicioSintomas', 'sintomas', 'profissionalSaude', 'racaCor', 'outrosSintomas', 'sexo',
+               'estado','municipio', 'estadoNotificacao', 'municipioNotificacao', 'dataEncerramento', 'evolucaoCaso',
+               'classificacaoFinal', 'codigoRecebeuVacina', 'dataPrimeiraDose', 'dataSegundaDose', 'codigoLaboratorioPrimeiraDose',
+                         'codigoLaboratorioSegundaDose','totalTestesRealizados', 'idade']
+
+        ngl_pb_2020_df = ngl_pb_2020_df.filter(relevant_columns,axis=1)
+        ngl_pb_2021_df = ngl_pb_2021_df.filter(relevant_columns, axis=1)
+        ngl_pb_2022_df = ngl_pb_2022_df.filter(relevant_columns, axis=1)
 
         ngl_pb_2020_csv = ngl_pb_2020_df.to_csv().encode('utf-8')
         ngl_pb_2021_csv = ngl_pb_2021_df.to_csv().encode('utf-8')
