@@ -23,22 +23,8 @@ services:
       - ./plugins:/opt/bitnami/airflow/plugins
       - ./requirements.txt:/bitnami/python/requirements.txt
       - ./notebooks:/opt/notebooks
-    environment:
-      - PYTHONPATH=/opt/bitnami/airflow
-      - AIRFLOW_HOME=/opt/bitnami/airflow
-      - AIRFLOW_EMAIL=${AIRFLOW_EMAIL}
-      - AIRFLOW_USERNAME=${AIRFLOW_USERNAME}
-      - AIRFLOW_PASSWORD=${AIRFLOW_PASSWORD}
-      - AIRFLOW_DATABASE_HOST=${AIRFLOW_DATABASE_HOST}
-      - AIRFLOW_DATABASE_NAME=${AIRFLOW_DATABASE_NAME}
-      - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DATABASE_USERNAME}
-      - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DATABASE_PASSWORD}
-      - AIRFLOW_EXECUTOR=CeleryExecutor
-      - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
-      - AIRFLOW_LOAD_EXAMPLES=no
-      - AIRFLOW_SECRET_KEY=${AIRFLOW_SECRET_KEY}
-      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
-      - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
+    env_file:
+      - .env
     ports:
       - "8080:8080"
     healthcheck:
@@ -57,19 +43,8 @@ services:
       - ./plugins:/opt/bitnami/airflow/plugins
       - ./requirements.txt:/bitnami/python/requirements.txt
       - ./notebooks:/opt/notebooks
-    environment:
-      - PYTHONPATH=/opt/bitnami/airflow
-      - AIRFLOW_DATABASE_HOST=${AIRFLOW_DATABASE_HOST}
-      - AIRFLOW_DATABASE_NAME=${AIRFLOW_DATABASE_NAME}
-      - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DATABASE_USERNAME}
-      - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DATABASE_PASSWORD}
-      - AIRFLOW_EXECUTOR=CeleryExecutor
-      - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
-      - AIRFLOW_LOAD_EXAMPLES=no
-      - AIRFLOW_SECRET_KEY=${AIRFLOW_SECRET_KEY}
-      - AIRFLOW_WEBSERVER_HOST=airflow-web
-      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
-      - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
+    env_file:
+      - .env
 
   airflow-worker:
     container_name: airflow-worker
@@ -81,29 +56,14 @@ services:
       - ./plugins:/opt/bitnami/airflow/plugins
       - ./requirements.txt:/bitnami/python/requirements.txt
       - ./notebooks:/opt/notebooks
-    environment:
-      - PYTHONPATH=/opt/bitnami/airflow
-      - AIRFLOW_DATABASE_HOST=${AIRFLOW_DATABASE_HOST}
-      - AIRFLOW_DATABASE_NAME=${AIRFLOW_DATABASE_NAME}
-      - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DATABASE_USERNAME}
-      - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DATABASE_PASSWORD}
-      - AIRFLOW_EXECUTOR=CeleryExecutor
-      - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
-      - AIRFLOW_LOAD_EXAMPLES=no
-      - AIRFLOW_SECRET_KEY=${AIRFLOW_SECRET_KEY}
-      - AIRFLOW_WEBSERVER_HOST=airflow-web
-      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
-      - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
-      - AIRFLOW__CORE__ENABLE_XCOM_PICKLING=True
+    env_file:
+      - .env
 
   airflowdb:
     container_name: airflowdb
     image: bitnami/postgresql:latest
-    environment:
-      - POSTGRESQL_DATABASE=${POSTGRES_DB}
-      - POSTGRESQL_USERNAME=${POSTGRES_USER}
-      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
-      - ALLOW_EMPTY_PASSWORD=yes
+    env_file:
+      - .env
     ports:
       - "5432:5432"
 
@@ -129,11 +89,8 @@ services:
   data_warehouse:
       image: mysql:5.7
       restart: always
-      environment:
-        MYSQL_DATABASE: 'covid_integration'
-        MYSQL_USER: 'user'
-        MYSQL_PASSWORD: 'password'
-        MYSQL_ROOT_PASSWORD: 'password'
+      env_file:
+        - .env
       ports:
         - '3306:3306'
       volumes:
