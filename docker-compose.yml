@@ -97,7 +97,7 @@ services:
     volumes:
       - mysql:/var/lib/mysql
 
-  spark:
+  spark-master:
     image: bitnami/spark:latest
     ports:
       - '7077:7077'
@@ -106,6 +106,17 @@ services:
       - ./spark_data:/bitnami/spark
     env_file:
       - .env
+
+  spark-worker:
+    image: bitnami/spark:latest
+    depends_on:
+      - spark-master
+    volumes:
+      - ./spark_worker_data:/bitnami/spark
+    env_file:
+      - .env
+    environment:
+      - SPARK_MODE=worker
 
 
 volumes:
