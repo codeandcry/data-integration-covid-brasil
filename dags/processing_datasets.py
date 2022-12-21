@@ -12,6 +12,8 @@ from io import BytesIO
 import pandas as pd
 from sqlalchemy import create_engine
 from airflow.hooks.base import BaseHook
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType,StructField, StringType, IntegerType,BooleanType,DoubleType
 
 log = logging.getLogger(__name__)
 
@@ -37,9 +39,9 @@ with DAG(
 
     @task(task_id="check_data_warehouse_connection")
     def checkDataWarehouseConnection():
-        dataWarehouseConn = BaseHook.get_connection('data_warehouse_connection')
+        mysql_connection = BaseHook.get_connection('mysql')
         cnx = create_engine(
-            dataWarehouseConn.schema + '://' + dataWarehouseConn.login + ':' + dataWarehouseConn.password + '@' + dataWarehouseConn.host)
+            mysql_connection.schema + '://' + mysql_connection.login + ':' + mysql_connection.password + '@' + mysql_connection.host)
         cnx.execute('select @@version as version;')
     check_data_warehouse_connection_step = checkDataWarehouseConnection()
 
@@ -48,34 +50,67 @@ with DAG(
         for item in client.list_objects(bucketName, recursive=True):
             print(f'Processing {item.object_name} in bucket={bucketName}')
             file = client.get_object(bucketName, item.object_name, item.object_name)
-            df = pd.read_csv(BytesIO(file.read()), sep=";", encoding='utf-8', low_memory=False)
+            df = pd.read_csv(BytesIO(file.read()), sep=",", encoding='utf-8', low_memory=False)
             print(f'{len(df)} rows in {item.object_name}')
             dfAll = pd.concat([dfAll, df], ignore_index=True, sort=False)
 
-        dfAll.fillna('', inplace=True)
+        # dfAll = dfAll.fillna('', inplace=True)
         print(f'bucket: {bucketName} rows: {len(dfAll)}')
         return dfAll
 
-    @task(task_id="merge_datasets")
-    def mergeDatasets():
-        dfNglRetorno = processBucketFilesToSingleDataFrame("ngl-output")
-        dfSragRetorno = processBucketFilesToSingleDataFrame("srag-output")
-        dfVacinacaoRetorno = processBucketFilesToSingleDataFrame("vacinacao-output")
+    def getNglScheme():
+        return StructType([
+            StructField("id", IntegerType(), True),
+            StructField("dataNotificacao", StringType(), True),
+            StructField("dataInicioSintomas", StringType(), True),
+            StructField("sintomas", StringType(), True),
+            StructField("profissionalSaude", StringType(), True),
+            StructField("racaCor", StringType(), True),
+            StructField("outrosSintomas", StringType(), True),
+            StructField("sexo", StringType(), True),
+            StructField("estado", StringType(), True),
+            StructField("municipio", StringType(), True),
+            StructField("estadoNotificacao", StringType(), True),
+            StructField("municipioNotificacao", StringType(), True),
+            StructField("dataEncerramento", StringType(), True),
+            StructField("evolucaoCaso", StringType(), True),
+            StructField("classificacaoFinal", StringType(), True),
+            StructField("codigoRecebeuVacina", StringType(), True),
+            StructField("dataPrimeiraDose", StringType(), True),
+            StructField("dataSegundaDose", StringType(), True),
+            StructField("codigoLaboratorioPrimeiraDose", StringType(), True),
+            StructField("codigoLaboratorioSegundaDose", StringType(), True),
+            StructField("totalTestesRealizados", IntegerType(), True),
+            StructField("idade", DoubleType(), True)
+        ])
 
-        print(f'count {len(dfNglRetorno)}')
-        print(f'count {len(dfSragRetorno)}')
-        print(f'count {len(dfVacinacaoRetorno)}')
-        print(f'merge datasets executed')
-    merge_data_step = mergeDatasets()
+    @task(task_id="process_datasets")
+    def process_datasets():
+        df_ngl = processBucketFilesToSingleDataFrame("ngl-output")
+        df_srag = processBucketFilesToSingleDataFrame("srag-output")
+        df_vacinacao = processBucketFilesToSingleDataFrame("vacinacao-output")
 
-    # @task(task_id="publish_to_data_warehouse")
-    # def publishToDataWarehouse(tableName, dataFrame):
-    #     mysql_connection = BaseHook.get_connection('data_warehouse_connection')
-    #     cnx = create_engine(
-    #         mysql_connection.schema + '://' + mysql_connection.login + ':' + mysql_connection.password + '@' + mysql_connection.host)
-    #     dataFrame.to_sql(name=tableName, con=cnx, if_exists='replace')
-    # publish_to_data_warehouse_step = publishToDataWarehouse()
+        spark = SparkSession.builder.master("spark://172.17.0.1:7077").appName("process_datasets").getOrCreate()
 
+        ngl_spark_df = spark.createDataFrame(df_ngl, getNglScheme())
+        ngl_spark_df.createOrReplaceTempView("NGL")
 
+        # srag_spark_df = spark.createDataFrame(df_srag, schemaNgl)
+        # srag_spark_df.createOrReplaceTempView("SRAG")
+        #
+        # vacinacao_spark_df = spark.createDataFrame(df_vacinacao, schemaNgl)
+        # vacinacao_spark_df.createOrReplaceTempView("VACINACAO")
 
-check_minio_connection_step >> merge_data_step >> check_data_warehouse_connection_step
+        spark.sql("select * from NGL n ORDER BY n.dataNotificacao DESC LIMIT 100").write.csv('dfNglResult.csv')
+        dfNglResult = pd.read_csv('dfNglResult.csv', sep=",", encoding='utf-8', low_memory=False)
+        publishToDataWarehouse("ngl", dfNglResult)
+
+    merge_data_step = process_datasets()
+
+    def publishToDataWarehouse(tableName, dataFrame):
+        mysql_connection = BaseHook.get_connection('mysql')
+        cnx = create_engine(
+            mysql_connection.schema + '://' + mysql_connection.login + ':' + mysql_connection.password + '@' + mysql_connection.host)
+        dataFrame.to_sql(name=tableName, con=cnx, if_exists='replace')
+
+check_minio_connection_step >> check_data_warehouse_connection_step >> merge_data_step
