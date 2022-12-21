@@ -16,8 +16,7 @@ services:
     container_name: airflow-web
     image: bitnami/airflow:latest
     depends_on:
-      - mongodb
-      - postgresql
+      - airflowdb
       - redis
     volumes:
       - ./dags:/opt/bitnami/airflow/dags
@@ -30,7 +29,7 @@ services:
       - AIRFLOW_EMAIL=${AIRFLOW_EMAIL}
       - AIRFLOW_USERNAME=${AIRFLOW_USERNAME}
       - AIRFLOW_PASSWORD=${AIRFLOW_PASSWORD}
-      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - AIRFLOW_DATABASE_HOST=${AIRFLOW_DATABASE_HOST}
       - AIRFLOW_DATABASE_NAME=${AIRFLOW_DATABASE_NAME}
       - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DATABASE_USERNAME}
       - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DATABASE_PASSWORD}
@@ -60,7 +59,7 @@ services:
       - ./notebooks:/opt/notebooks
     environment:
       - PYTHONPATH=/opt/bitnami/airflow
-      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - AIRFLOW_DATABASE_HOST=${AIRFLOW_DATABASE_HOST}
       - AIRFLOW_DATABASE_NAME=${AIRFLOW_DATABASE_NAME}
       - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DATABASE_USERNAME}
       - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DATABASE_PASSWORD}
@@ -84,7 +83,7 @@ services:
       - ./notebooks:/opt/notebooks
     environment:
       - PYTHONPATH=/opt/bitnami/airflow
-      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - AIRFLOW_DATABASE_HOST=${AIRFLOW_DATABASE_HOST}
       - AIRFLOW_DATABASE_NAME=${AIRFLOW_DATABASE_NAME}
       - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DATABASE_USERNAME}
       - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DATABASE_PASSWORD}
@@ -112,7 +111,7 @@ services:
       - PYTHONPATH=/src
       - AIRFLOW_ADMIN_USERNAME=${AIRFLOW_USERNAME}
       - AIRFLOW_ADMIN_PASSWORD=${AIRFLOW_PASSWORD}
-      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - AIRFLOW_DATABASE_HOST=${AIRFLOW_DATABASE_HOST}
       - AIRFLOW_DATABASE_NAME=${AIRFLOW_DATABASE_NAME}
       - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DATABASE_USERNAME}
       - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DATABASE_PASSWORD}
@@ -124,15 +123,9 @@ services:
     command: >
       bash -c "bash /src/scripts/wait_for_airflow_web.sh
       && pytest -vvv -s --log-cli-level=DEBUG /src/tests/integration"
-  mongodb:
-    container_name: airflow-mongodb
-    image: mongo
-    command: mongod
-    ports:
-      - "27017:27017"
 
-  postgresql:
-    container_name: airflow-postgresql
+  airflowdb:
+    container_name: airflowdb
     image: bitnami/postgresql:latest
     environment:
       - POSTGRESQL_DATABASE=${POSTGRES_DB}
@@ -161,18 +154,18 @@ services:
       /opt/conda/bin/jupyter notebook --notebook-dir=/opt/notebooks --ip='0.0.0.0' --port=8888 --no-browser --allow-root
     tty: true
 
-
-  yugabyte:
-    container_name: yugabyte
-    image: yugabytedb/yugabyte:latest
-    ports:
-      - "7000:7000"
-      - "9002:9000"
-      - "5433:5433"
-      - "9042:9042"
-    volumes:
-      - ./yb_data:/home/yugabyte/yb_data
-    command: bin/yugabyted start --base_dir=/home/yugabyte/yb_data --daemon=false
+  data_warehouse:
+      image: mysql:5.7
+      restart: always
+      environment:
+        MYSQL_DATABASE: 'covid_integration'
+        MYSQL_USER: 'user'
+        MYSQL_PASSWORD: 'password'
+        MYSQL_ROOT_PASSWORD: 'password'
+      ports:
+        - '3306:3306'
+      volumes:
+        - mysql:/var/lib/mysql
 
 volumes:
   minio-data: 
@@ -182,4 +175,6 @@ volumes:
   dags:
     driver: local
   notebooks:
+    driver: local
+  mysql:
     driver: local
