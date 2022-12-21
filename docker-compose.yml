@@ -57,8 +57,11 @@ services:
       - ./plugins:/opt/bitnami/airflow/plugins
       - ./requirements.txt:/bitnami/python/requirements.txt
       - ./notebooks:/opt/notebooks
+      - ./jdk1.8.0_301:/opt/jdk1.8.0_301
     env_file:
       - .env
+    environment:
+      - JAVA_HOME=/opt/jdk1.8.0_301
 
   airflowdb:
     container_name: airflowdb

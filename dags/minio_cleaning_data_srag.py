@@ -74,7 +74,7 @@ with DAG(
         srag_2021_csv = srag_2021_filtered_df.to_csv().encode('utf-8')
         srag_2022_csv = srag_2022_filtered_df.to_csv().encode('utf-8')
 
-        srag_2020_csv["College"].fillna("No College", inplace=True)
+        # srag_2020_csv["College"].fillna("No College", inplace=True)
 
         client.put_object("srag-output", "output-srag-pb-2020.csv", data=BytesIO(srag_2020_csv),
                           length=len(srag_2020_csv), content_type='application/csv')
