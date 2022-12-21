@@ -61,9 +61,20 @@ with DAG(
         srag_2021_df.drop_duplicates(keep='first', inplace=True)
         srag_2022_df.drop_duplicates(keep='first', inplace=True)
 
-        srag_2020_csv = srag_2020_df.to_csv().encode('utf-8')
-        srag_2021_csv = srag_2021_df.to_csv().encode('utf-8')
-        srag_2022_csv = srag_2022_df.to_csv().encode('utf-8')
+        srag_2020_df_mask = srag_2020_df['SG_UF_NOT'] == 'PB'
+        srag_2020_filtered_df = srag_2020_df[srag_2020_df_mask]
+
+        srag_2021_df_mask = srag_2021_df['SG_UF_NOT'] == 'PB'
+        srag_2021_filtered_df = srag_2021_df[srag_2021_df_mask]
+
+        srag_2022_df_mask = srag_2022_df['SG_UF_NOT'] == 'PB'
+        srag_2022_filtered_df = srag_2022_df[srag_2022_df_mask]
+
+        srag_2020_csv = srag_2020_filtered_df.to_csv().encode('utf-8')
+        srag_2021_csv = srag_2021_filtered_df.to_csv().encode('utf-8')
+        srag_2022_csv = srag_2022_filtered_df.to_csv().encode('utf-8')
+
+        srag_2020_csv["College"].fillna("No College", inplace=True)
 
         client.put_object("srag-output", "output-srag-pb-2020.csv", data=BytesIO(srag_2020_csv),
                           length=len(srag_2020_csv), content_type='application/csv')
