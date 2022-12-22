@@ -13,3 +13,5 @@ dags/__pycache__/
 yb_data/
 notebooks/confirm.txt
 notebooks/cookies.txt
+jdk/
+minio_data/
