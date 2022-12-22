@@ -10,10 +10,9 @@ from airflow.decorators import task
 from minio import Minio
 from io import BytesIO
 import pandas as pd
-from pandas.io import sql
+# from pandas.io import sql
 from sqlalchemy import create_engine
-from airflow.hooks.base import BaseHook
-from pyspark.sql import SparkSession
+# from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType,StructField, StringType, IntegerType,BooleanType,DoubleType
 
 log = logging.getLogger(__name__)
@@ -114,10 +113,8 @@ with DAG(
         # dfResult = pd.read_csv('dfNglResult.csv', sep=",", encoding='utf-8', low_memory=False)
         # publishToDataWarehouse("ngl", dfNglResult)
 
-# merge_data_step = process_datasets()
 
     def publishToDataWarehouse(tableName, dataFrame):
-        print(len(dataFrame))
         # mysql_connection = BaseHook.get_connection('mysql')
         # cnx = create_engine(
         #     mysql_connection.schema + '://' + mysql_connection.login + ':' + mysql_connection.password + '@' + mysql_connection.host)
@@ -130,4 +127,4 @@ with DAG(
         # dataFrame.to_sql(name=tableName, con=cnx, if_exists='replace')
 
 
-check_minio_connection_step >> check_data_warehouse_connection_step >> process_data_to_datawarehouse
+    check_minio_connection_step >> check_data_warehouse_connection_step >> process_data_to_datawarehouse_step
