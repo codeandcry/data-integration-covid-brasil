@@ -127,4 +127,4 @@ with DAG(
         # dataFrame.to_sql(name=tableName, con=cnx, if_exists='replace')
 
 
-    check_minio_connection_step >> check_data_warehouse_connection_step >> process_data_to_datawarehouse_step
+check_minio_connection_step >> check_data_warehouse_connection_step >> process_data_to_datawarehouse_step
