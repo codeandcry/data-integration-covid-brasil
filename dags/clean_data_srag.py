@@ -20,7 +20,7 @@ BASE_DIR = tempfile.gettempdir()
 client = Minio("172.17.0.1:9000", secure=False, access_key="grupo2", secret_key="admin123")
 
 with DAG(
-        dag_id="minio_cleaning_data_srag",
+        dag_id="clean_data_srag",
         schedule=None,
         start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
         catchup=False,
@@ -70,9 +70,35 @@ with DAG(
         srag_2022_df_mask = srag_2022_df['SG_UF_NOT'] == 'PB'
         srag_2022_filtered_df = srag_2022_df[srag_2022_df_mask]
 
-        srag_2020_csv = srag_2020_filtered_df.to_csv().encode('utf-8')
-        srag_2021_csv = srag_2021_filtered_df.to_csv().encode('utf-8')
-        srag_2022_csv = srag_2022_filtered_df.to_csv().encode('utf-8')
+        relevant_columns = [
+            'DT_NOTIFIC',
+            'ID_MUNICIP',
+            'ID_UNIDADE',
+            'CS_SEXO',
+            'DT_NASC',
+            'SG_UF',
+            'ID_MN_RESI',
+            'DOSE_1_COV',
+            'DOSE_2_COV',
+            'DOSE_REF',
+            'FAB_COV_1',
+            'FAB_COV_2',
+            'FAB_COVREF',
+            'DT_EVOLUCA',
+            'EVOLUCAO',
+            'PAC_DSCBO',
+            'ANTIVIRAL',
+            'MAE_VAC',
+            'DT_DOSEUNI'
+        ]
+
+        srag_pb_2020_df = srag_2020_filtered_df.filter(relevant_columns, axis=1)
+        srag_pb_2021_df = srag_2021_filtered_df.filter(relevant_columns, axis=1)
+        srag_pb_2022_df = srag_2022_filtered_df.filter(relevant_columns, axis=1)
+
+        srag_2020_csv = srag_pb_2020_df.to_csv(index=False, sep=';').encode('utf-8')
+        srag_2021_csv = srag_pb_2021_df.to_csv(index=False, sep=';').encode('utf-8')
+        srag_2022_csv = srag_pb_2022_df.to_csv(index=False, sep=';').encode('utf-8')
 
         # srag_2020_csv["College"].fillna("No College", inplace=True)
 

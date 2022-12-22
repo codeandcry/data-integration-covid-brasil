@@ -20,7 +20,7 @@ BASE_DIR = tempfile.gettempdir()
 client = Minio("172.17.0.1:9000", secure=False, access_key="grupo2", secret_key="admin123")
 
 with DAG(
-        dag_id="minio_cleaning_data_ngl",
+        dag_id="clean_data_ngl",
         schedule=None,
         start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
         catchup=False,
@@ -61,7 +61,7 @@ with DAG(
         ngl_pb_2021_df.drop_duplicates(keep='first', inplace=True)
         ngl_pb_2022_df.drop_duplicates(keep='first', inplace=True)
 
-        relevant_columns = ['dataNotificacao', 'dataInicioSintomas', 'sintomas', 'profissionalSaude', 'racaCor', 'outrosSintomas', 'sexo',
+        relevant_columns = ['dataNotificacao', 'dataInicioSintomas', 'sintomas', 'profissionalSaude', 'racaCor', 'sexo',
                'estado','municipio', 'estadoNotificacao', 'municipioNotificacao', 'dataEncerramento', 'evolucaoCaso',
                'classificacaoFinal', 'codigoRecebeuVacina', 'dataPrimeiraDose', 'dataSegundaDose', 'codigoLaboratorioPrimeiraDose',
                          'codigoLaboratorioSegundaDose','totalTestesRealizados', 'idade']
@@ -70,9 +70,9 @@ with DAG(
         ngl_pb_2021_df = ngl_pb_2021_df.filter(relevant_columns, axis=1)
         ngl_pb_2022_df = ngl_pb_2022_df.filter(relevant_columns, axis=1)
 
-        ngl_pb_2020_csv = ngl_pb_2020_df.to_csv().encode('utf-8')
-        ngl_pb_2021_csv = ngl_pb_2021_df.to_csv().encode('utf-8')
-        ngl_pb_2022_csv = ngl_pb_2022_df.to_csv().encode('utf-8')
+        ngl_pb_2020_csv = ngl_pb_2020_df.to_csv(index=False, sep=';').encode('utf-8')
+        ngl_pb_2021_csv = ngl_pb_2021_df.to_csv(index=False, sep=';').encode('utf-8')
+        ngl_pb_2022_csv = ngl_pb_2022_df.to_csv(index=False, sep=';').encode('utf-8')
 
         client.put_object("ngl-output", "output-ngl-pb-2020.csv", data=BytesIO(ngl_pb_2020_csv),
                           length=len(ngl_pb_2020_csv), content_type='application/csv')

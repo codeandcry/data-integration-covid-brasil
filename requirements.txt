@@ -4,3 +4,4 @@ findspark==2.0.1
 pendulum
 sqlalchemy
 pymysql
+pandas

@@ -20,7 +20,7 @@ BASE_DIR = tempfile.gettempdir()
 client = Minio("172.17.0.1:9000", secure=False, access_key="grupo2", secret_key="admin123")
 
 with DAG(
-        dag_id="minio_cleaning_data_vacinacao",
+        dag_id="clean_data_vacinacao",
         schedule=None,
         start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
         catchup=False,
@@ -55,7 +55,23 @@ with DAG(
 
         vacinacao_df.drop_duplicates(keep='first', inplace=True)
 
-        vacinacao_csv = vacinacao_df.to_csv().encode('utf-8')
+        relevant_columns = [
+            'paciente_idade',
+            'paciente_dataNascimento',
+            'paciente_enumSexoBiologico',
+            'paciente_racaCor_valor',
+            'paciente_endereco_nmMunicipio',
+            'paciente_endereco_uf',
+            'estabelecimento_razaoSocial',
+            'estabelecimento_municipio_nome',
+            'vacina_categoria_nome',
+            'vacina_fabricante_nome',
+            'vacina_nome'
+        ]
+
+        vacinacao_filtered = vacinacao_df.filter(relevant_columns, axis=1)
+
+        vacinacao_csv = vacinacao_filtered.to_csv(index=False, sep=';').encode('utf-8')
 
         client.put_object("vacinacao-output", "output-vacinacao-covid-pb.csv", data=BytesIO(vacinacao_csv),
                           length=len(vacinacao_csv), content_type='application/csv')
